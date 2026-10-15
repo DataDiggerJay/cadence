@@ -320,11 +320,17 @@ function hiatusThreshold(g){
 }
 function labelCadence(d){
   if(d==null) return "—";
-  if(d<1.2) return "daily or more"; if(d<2.6) return "several times a week";
-  if(d<4.5) return "twice a week";  if(d<9.5) return "weekly";
-  if(d<18)  return "every two weeks"; if(d<24) return "three times a month";
-  if(d<45)  return "monthly"; if(d<75) return "every two months";
-  if(d<135) return "quarterly"; return "sporadic";
+  if(d<1.5)  return "daily or more";
+  if(d<3.5)  return "several times a week";
+  if(d<5.5)  return "twice a week";
+  if(d<10.5) return "weekly";
+  if(d<17.5) return "every two weeks";
+  if(d<26)   return "every 3 weeks";
+  if(d<40)   return "monthly";
+  if(d<70)   return "every 1–2 months";
+  if(d<100)  return "every 3 months";
+  if(d<135)  return "every 3–4 months";
+  return "sporadic";
 }
 function windowStats(ts, fromTs, thr, excl){
   const w = ts.filter(t=>t>=fromTs);
