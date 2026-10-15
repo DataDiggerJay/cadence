@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadence — publishing rhythm for podcast feeds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFF2F1; --card:#FFFFFF; --ink:#12201D; --slate:#56655F; --faint:#8B9A94;
+  --rule:#D6DEDA; --rule-strong:#B9C5C0;
+  --signal:#005E52; --signal-soft:#DFEDE9;
+  --ochre:#8A6000; --ochre-soft:#F4E9CF;
+  --rose:#9C2B3C; --rose-soft:#F6E1E3;
+  --r:3px;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px}
+a{color:var(--signal)}
+
+/* ---------- masthead ---------- */
+.masthead{border-bottom:1px solid var(--rule-strong);background:var(--card)}
+.masthead .wrap{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+  padding-top:26px;padding-bottom:18px;flex-wrap:wrap}
+.wordmark{
+  font-family:var(--display);font-variation-settings:"wdth" 125,"wght" 700;
+  font-size:30px;letter-spacing:.16em;text-transform:uppercase;line-height:1;margin:0;
+}
+.tagline{font-size:13px;color:var(--slate);margin:9px 0 0;max-width:56ch}
+.masthead-meta{font-family:var(--mono);font-size:11px;color:var(--faint);
+  text-transform:uppercase;letter-spacing:.1em;text-align:right}
+
+/* ---------- console ---------- */
+.console{padding:26px 0 24px;border-bottom:1px solid var(--rule)}
+.console-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,1fr);gap:26px}
+label.field{display:block}
+.lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--slate);display:block;margin-bottom:7px}
+textarea,input[type=text]{
+  width:100%;background:var(--card);border:1px solid var(--rule-strong);border-radius:var(--r);
+  padding:11px 12px;font-family:var(--mono);font-size:12.5px;color:var(--ink);line-height:1.65;
+  resize:vertical;
+}
+textarea{min-height:132px}
+textarea:focus,input:focus{outline:2px solid var(--signal);outline-offset:1px;border-color:var(--signal)}
+.hint{font-size:12px;color:var(--faint);margin-top:7px}
+.opts{border:1px solid var(--rule);border-radius:var(--r);background:var(--card);padding:14px 15px}
+.opt{display:flex;gap:9px;align-items:flex-start;margin-bottom:11px;font-size:13px;cursor:pointer}
+.opt:last-of-type{margin-bottom:0}
+.opt input{margin:3px 0 0;accent-color:var(--signal);flex:none}
+.opt span small{display:block;color:var(--faint);font-size:11.5px;line-height:1.4}
+.actions{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
+button{font-family:var(--body);font-size:13.5px;border-radius:var(--r);cursor:pointer;
+  padding:9px 17px;border:1px solid transparent;transition:background .12s,border-color .12s}
+button:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.btn-primary{background:var(--signal);color:#fff;font-weight:500}
+.btn-primary:hover{background:#004A41}
+.btn-primary:disabled{background:var(--rule-strong);cursor:not-allowed}
+.btn-ghost{background:transparent;border-color:var(--rule-strong);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn-text{background:none;border:none;color:var(--slate);text-decoration:underline;
+  text-underline-offset:3px;padding:9px 4px}
+.btn-text:hover{color:var(--ink)}
+
+/* ---------- results bar ---------- */
+.bar{display:flex;justify-content:space-between;align-items:center;gap:18px;
+  padding:15px 0;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.tally{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--slate);
+  text-transform:uppercase}
+.tally b{color:var(--ink);font-weight:600}
+.bar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select{font-family:var(--mono);font-size:11.5px;padding:7px 9px;border-radius:var(--r);
+  border:1px solid var(--rule-strong);background:var(--card);color:var(--ink)}
+select:focus{outline:2px solid var(--signal);outline-offset:1px}
+
+/* ---------- grid + cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(376px,1fr));
+  gap:18px;padding:22px 0 60px}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);
+  padding:17px 18px 15px;display:flex;flex-direction:column;gap:14px;
+  animation:rise .34s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.card.pending{border-style:dashed;color:var(--faint)}
+
+.head{display:flex;gap:13px;align-items:flex-start}
+.art{width:62px;height:62px;flex:none;border-radius:var(--r);object-fit:cover;
+  background:var(--paper);border:1px solid var(--rule)}
+.art-ph{display:flex;align-items:center;justify-content:center;font-family:var(--mono);
+  font-size:19px;color:var(--faint)}
+.head-txt{min-width:0;flex:1}
+.title{font-family:var(--display);font-variation-settings:"wdth" 112,"wght" 600;
+  font-size:16px;line-height:1.24;margin:0 0 3px;letter-spacing:-.005em;
+  overflow-wrap:anywhere}
+.title a{color:inherit;text-decoration:none}
+.title a:hover{text-decoration:underline;text-underline-offset:2px}
+.byline{font-size:12px;color:var(--faint);margin:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;padding:3.5px 8px;border-radius:100px;margin-top:7px}
+.badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.s-active{background:var(--signal-soft);color:var(--signal)}
+.s-late{background:var(--ochre-soft);color:var(--ochre)}
+.s-hiatus{background:var(--ochre-soft);color:var(--ochre)}
+.s-dormant,.s-ended{background:var(--rose-soft);color:var(--rose)}
+.s-unknown{background:var(--paper);color:var(--slate)}
+
+/* four medians in a 2x2 grid — today-anchored on top, last-episode-anchored below */
+.metrics{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule)}
+.metric{padding:13px 0 12px}
+.metric:nth-child(even){border-left:1px solid var(--rule);padding-left:15px}
+.metric:nth-child(n+3){border-top:1px solid var(--rule)}
+.metric .lbl{margin-bottom:6px;font-size:9.5px}
+.metric .note{font-family:var(--mono);font-size:10px;color:var(--ochre);margin-top:5px}
+.big{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:25px;
+  font-weight:500;line-height:1;letter-spacing:-.02em}
+.big u{text-decoration:none;font-size:12.5px;color:var(--slate);margin-left:2px}
+.cad{font-size:12.5px;color:var(--signal);margin-top:4px;font-weight:500}
+.range{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:7px;line-height:1.5}
+.range b{color:var(--slate);font-weight:500}
+.dim{color:var(--faint);font-size:13px}
+
+/* signature: the transmission strip */
+.strip-wrap{margin-top:-2px}
+.strip{width:100%;height:46px;display:block;overflow:visible}
+.strip .tick{stroke:var(--ink);stroke-width:1.1;opacity:.62}
+.strip .tick-recent{stroke:var(--signal);opacity:.9}
+.strip .void{fill:var(--ochre-soft)}
+.strip .voidlbl{fill:var(--ochre);font-family:var(--mono);font-size:7.5px;letter-spacing:.04em}
+.strip .axis{stroke:var(--rule-strong);stroke-width:1}
+.strip .brk{stroke:var(--signal);stroke-width:1}
+.strip .yr{fill:var(--faint);font-family:var(--mono);font-size:7.5px;letter-spacing:.08em}
+.strip .brklbl{fill:var(--signal);font-family:var(--mono);font-size:7.5px;letter-spacing:.08em}
+@media (prefers-reduced-motion:no-preference){
+  .strip .tick{animation:ink .5s ease both}
+  @keyframes ink{from{opacity:0}}
+}
+.foot{display:flex;justify-content:space-between;gap:12px;font-size:11.5px;color:var(--slate);
+  flex-wrap:wrap;align-items:baseline}
+.foot .mono{font-family:var(--mono);font-size:11px}
+.warn{font-size:11.5px;color:var(--ochre);background:var(--ochre-soft);
+  border-radius:var(--r);padding:8px 10px;line-height:1.45}
+.err{font-size:12.5px;color:var(--rose);background:var(--rose-soft);
+  border-radius:var(--r);padding:10px 11px;line-height:1.5}
+.err code{font-family:var(--mono);font-size:11px;word-break:break-all}
+
+/* ---------- empty + notes ---------- */
+.empty{padding:64px 0 80px;max-width:60ch}
+.empty h2{font-family:var(--display);font-variation-settings:"wdth" 118,"wght" 600;
+  font-size:20px;margin:0 0 10px;letter-spacing:-.01em}
+.empty p{color:var(--slate);margin:0 0 14px}
+details{border-top:1px solid var(--rule);padding:16px 0}
+summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--slate)}
+summary:hover{color:var(--ink)}
+details[open] summary{margin-bottom:12px;color:var(--ink)}
+.rules{font-size:13.5px;color:var(--slate);max-width:82ch}
+.rules ol{padding-left:20px;margin:0}
+.rules li{margin-bottom:8px}
+.rules code{font-family:var(--mono);font-size:12px;background:var(--paper);
+  padding:1px 5px;border-radius:2px;color:var(--ink)}
+footer{border-top:1px solid var(--rule);padding:20px 0 40px;font-size:12px;color:var(--faint)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:820px){
+  .console-grid{grid-template-columns:1fr}
+  .wrap{padding:0 18px}
+  .wordmark{font-size:24px}
+  .masthead-meta{text-align:left}
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div>
+      <h1 class="wordmark">Cadence</h1>
+      <p class="tagline">Publishing rhythm for podcast RSS feeds. Four medians per show —
+        the last two years, everything the feed still carries, and the two years and one year
+        before the last episode — with every break counted.</p>
+    </div>
+    <div class="masthead-meta" id="clock">—</div>
+  </div>
+</header>
+
+<section class="console">
+  <div class="wrap">
+    <div class="console-grid">
+      <label class="field">
+        <span class="lbl">Feed URLs — one per line, or comma separated</span>
+        <textarea id="feeds" spellcheck="false" placeholder="https://feeds.example.com/show.xml
+https://anchor.fm/s/1234/podcast/rss, https://feeds.acast.com/public/shows/abcd"></textarea>
+        <span class="hint">Duplicates are dropped. Feeds load in parallel, four at a time.</span>
+      </label>
+
+      <div class="opts">
+        <span class="lbl">Reading options</span>
+        <label class="opt"><input type="checkbox" id="optFull" checked>
+          <span>Skip trailers and bonus<small>Counts only <code>episodeType: full</code></small></span></label>
+        <label class="opt"><input type="checkbox" id="optDay" checked>
+          <span>Collapse same-day drops<small>An archive dump counts as one release</small></span></label>
+        <label class="opt"><input type="checkbox" id="optExcl">
+          <span>Exclude hiatus gaps<small>Off: breaks are counted, as asked. On: shows working cadence only</small></span></label>
+        <label class="field" style="margin-top:13px">
+          <span class="lbl">CORS proxy — <code>{url}</code> is replaced</span>
+          <input type="text" id="proxy" spellcheck="false"
+            value="https://api.allorigins.win/raw?url={url}">
+          <span class="hint" id="proxyHint">Browsers cannot fetch most feeds directly. Run serve.py to proxy them yourself.</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="run">Analyze feeds</button>
+      <button class="btn-ghost" id="demo">Load demo data</button>
+      <button class="btn-text" id="csv" hidden>Download CSV</button>
+      <button class="btn-text" id="clear" hidden>Clear</button>
+    </div>
+  </div>
+</section>
+
+<main class="wrap" id="main">
+  <div class="bar" id="bar" hidden>
+    <div class="tally" id="tally" aria-live="polite"></div>
+    <div class="bar-right">
+      <label class="sr" for="sort">Sort</label>
+      <select id="sort">
+        <option value="added">Order added</option>
+        <option value="fast">Fastest cadence first</option>
+        <option value="slow">Slowest cadence first</option>
+        <option value="recent">Most recent episode</option>
+        <option value="stale">Longest silent</option>
+        <option value="title">Title A–Z</option>
+      </select>
+      <label class="sr" for="filter">Filter</label>
+      <select id="filter">
+        <option value="all">All shows</option>
+        <option value="live">Publishing now</option>
+        <option value="paused">Paused or dormant</option>
+        <option value="drift">Cadence has drifted</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="empty" id="empty">
+    <h2>Nothing loaded yet</h2>
+    <p>Paste feed URLs above and analyze, or load the demo to see four synthetic shows —
+      one weekly with a long break, one seasonal, one that quietly stopped, and one that
+      migrated its back catalogue in a single dump.</p>
+  </div>
+
+  <details>
+    <summary>How each number is calculated</summary>
+    <div class="rules">
+      <ol>
+        <li>Read every <code>&lt;item&gt;</code>, then drop trailers and bonus episodes, items with
+          an unreadable <code>pubDate</code>, and anything dated more than two days in the future.</li>
+        <li>Sort ascending, then collapse episodes sharing a calendar day into one release event —
+          otherwise a migrated back catalogue injects dozens of fake zero-day gaps.</li>
+        <li>Diff consecutive releases into a list of gaps in fractional days. Every statistic
+          below comes from that list.</li>
+        <li>Take the <b>median</b>, never the mean. One long break moves a mean by weeks and a
+          median by nothing.</li>
+        <li>Set the hiatus threshold from the show's own rhythm:
+          <code>max(3 × median, median + 4 × 1.4826 × MAD, 28 days)</code>. The multiple scales
+          from daily to monthly shows, the MAD term protects genuinely irregular shows, and the
+          28-day floor stops a late weekly episode counting as a break.</li>
+        <li>Compute the median over four windows — the last 730 days, every release the feed
+          still carries, and the 730 and 365 days ending at the last episode. The last-episode
+          windows show the rhythm a show had while it was active, even if it has since gone
+          quiet; when a show is younger than the window, it starts at the first episode and is
+          flagged. Breaks stay in the data unless you exclude them; they are listed under each
+          strip either way.</li>
+        <li>Compare days since the last episode against the expected gap:
+          within 1.5× is on schedule, 3× is late, past the hiatus threshold is a break,
+          and beyond that is dormant.</li>
+      </ol>
+      <p style="margin-top:14px"><b>Two caveats the numbers cannot fix.</b> Most hosts truncate the
+        feed to the newest 50–300 items, so an all-time figure describes only what is still
+        published — flagged on the card when the item count looks capped. And when a show has
+        changed pace, the all-time median is pulled toward whichever era published more
+        episodes, which is always the busier one. That is what the two-year window is for: when
+        it disagrees with all-time, trust the two-year figure and read the difference as drift.</p>
+    </div>
+  </details>
+</main>
+
+<footer><div class="wrap">Runs entirely in your browser. No feed data is stored or sent anywhere except to the proxy you choose.</div></footer>
+
+<script>
+"use strict";
+const DAY = 86400000, WINDOW_DAYS = 730, WINDOW_1Y = 365;
+const $ = (id) => document.getElementById(id);
+
+/* ---------------- cadence math ---------------- */
+const median = (a) => { if(!a.length) return null;
+  const s=[...a].sort((x,y)=>x-y), m=s.length>>1;
+  return s.length%2 ? s[m] : (s[m-1]+s[m])/2; };
+const mad = (a) => { if(a.length<2) return 0; const m=median(a);
+  return median(a.map(x=>Math.abs(x-m))); };
+const gapsOf = (ts) => ts.slice(1).map((t,i)=>(t-ts[i])/DAY);
+
+function hiatusThreshold(g){
+  if(!g.length) return 28;
+  const m=median(g), sigma=1.4826*mad(g);
+  return Math.max(3*m, m+4*sigma, 28);
+}
+function labelCadence(d){
+  if(d==null) return "—";
+  if(d<1.2) return "daily or more"; if(d<2.6) return "several times a week";
+  if(d<4.5) return "twice a week";  if(d<9.5) return "weekly";
+  if(d<18)  return "every two weeks"; if(d<24) return "three times a month";
+  if(d<45)  return "monthly"; if(d<75) return "every two months";
+  if(d<135) return "quarterly"; return "sporadic";
+}
+function windowStats(ts, fromTs, thr, excl){
+  const w = ts.filter(t=>t>=fromTs);
+  if(w.length<2) return {episodes:w.length,gaps:0,median:null,first:w[0]??null,
+    last:w[w.length-1]??null,hiatusCount:0,hiatusDays:0,longestHiatus:0,breaks:[]};
+  const g=gapsOf(w), breaks=[];
+  g.forEach((x,i)=>{ if(x>thr) breaks.push({from:w[i],to:w[i+1],days:x}); });
+  const used = excl ? g.filter(x=>x<=thr) : g;
+  return {episodes:w.length, gaps:g.length, median:median(used),
+    mean:(w[w.length-1]-w[0])/DAY/g.length, first:w[0], last:w[w.length-1],
+    spanDays:(w[w.length-1]-w[0])/DAY, hiatusCount:breaks.length,
+    hiatusDays:breaks.reduce((a,b)=>a+b.days,0),
+    longestHiatus:breaks.length?Math.max(...breaks.map(b=>b.days)):0, breaks};
+}
+function statusOf(daysSince, expected, thr, complete){
+  if(complete) return {key:"ended", text:"Ended"};
+  if(expected==null) return {key:"unknown", text:"Unknown"};
+  if(daysSince<=1.5*expected) return {key:"active", text:"On schedule"};
+  if(daysSince<=3*expected)   return {key:"late",   text:"Running late"};
+  if(daysSince<=Math.max(2*thr,180)) return {key:"hiatus", text:"On hiatus"};
+  return {key:"dormant", text:"Dormant"};
+}
+
+/* ---------------- feed parsing ---------------- */
+const ITUNES = "http://www.itunes.com/dtds/podcast-1.0.dtd";
+function pick(node, name, ns){
+  if(ns){ const e=node.getElementsByTagNameNS(ns,name)[0]; if(e) return e; }
+  for(const c of node.children) if(c.localName===name) return c;
+  return null;
+}
+const txt = (node,name,ns) => { const e=pick(node,name,ns); return e ? e.textContent.trim() : ""; };
+// <image> and <itunes:image> share a localName, so plain lookups must reject namespaced nodes.
+function pickPlain(node,name){
+  for(const c of node.children) if(c.localName===name && !c.namespaceURI) return c;
+  return null;
+}
+
+function parseDate(raw){
+  if(!raw) return null;
+  let t = Date.parse(raw);
+  if(isNaN(t)) t = Date.parse(raw.replace(/\s+\([^)]*\)\s*$/,"").replace(/(\d)([A-Z]{2,4})$/,"$1 $2"));
+  return isNaN(t) ? null : t;
+}
+
+function parseFeed(xmlText){
+  const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+  if(doc.querySelector("parsererror")) throw new Error("The response is not valid XML.");
+  const ch = doc.querySelector("channel") || doc.querySelector("feed");
+  if(!ch) throw new Error("No <channel> element — this does not look like an RSS podcast feed.");
+
+  const iImg = pick(ch,"image",ITUNES);
+  const plainImg = pickPlain(ch,"image");
+  const image = (iImg && iImg.getAttribute("href")) ||
+                (plainImg ? txt(plainImg,"url") : "") || "";
+  const meta = {
+    title: txt(ch,"title") || "Untitled feed",
+    author: txt(ch,"author",ITUNES) || txt(ch,"managingEditor") || "",
+    link: txt(ch,"link"),
+    image,
+    complete: txt(ch,"complete",ITUNES).toLowerCase()==="yes",
+    newFeedUrl: txt(ch,"new-feed-url",ITUNES),
+  };
+
+  const items = [...ch.children].filter(n=>n.localName==="item");
+  const horizon = Date.now() + 2*DAY;
+  let bad=0, future=0, skipped=0;
+  const eps=[], seasons=new Set();
+
+  for(const it of items){
+    const t = parseDate(txt(it,"pubDate"));
+    if(t===null){ bad++; continue; }
+    if(t>horizon){ future++; continue; }
+    const type = (txt(it,"episodeType",ITUNES) || "full").toLowerCase();
+    const s = parseInt(txt(it,"season",ITUNES),10);
+    if(!isNaN(s)) seasons.add(s);
+    eps.push({t, type});
+  }
+  eps.sort((a,b)=>a.t-b.t);
+  return {meta, eps, raw:{count:items.length, bad, future, seasons:seasons.size}};
+}
+
+function analyze(parsed, opts){
+  const {meta, eps, raw} = parsed;
+  let list = opts.fullOnly ? eps.filter(e=>e.type==="full") : eps;
+  const excludedTypes = eps.length - list.length;
+
+  let ts = list.map(e=>e.t);
+  let collapsed = 0;
+  if(opts.collapseDay){
+    const seen=new Set(), out=[];
+    for(const t of ts){ const k=new Date(t).toISOString().slice(0,10);
+      if(seen.has(k)){ collapsed++; continue; } seen.add(k); out.push(t); }
+    ts = out;
+  }
+  if(ts.length<2) return {meta, error:null, thin:true, episodes:ts.length};
+
+  const thr  = hiatusThreshold(gapsOf(ts));
+  const last = ts[ts.length-1];
+  const all  = windowStats(ts, -Infinity, thr, opts.excludeHiatus);
+  const two  = windowStats(ts, Date.now()-WINDOW_DAYS*DAY, thr, opts.excludeHiatus);
+  // Same windows, anchored to the last episode instead of today.
+  // For a show younger than the window, windowStats simply starts at the first episode.
+  const twoL = windowStats(ts, last-WINDOW_DAYS*DAY, thr, opts.excludeHiatus);
+  const oneL = windowStats(ts, last-WINDOW_1Y*DAY, thr, opts.excludeHiatus);
+  const historyDays = (last-ts[0])/DAY;
+  const daysSince = (Date.now()-last)/DAY;
+  const expected = two.median ?? all.median;
+  const status = statusOf(daysSince, expected, thr, meta.complete);
+
+  const warnings=[];
+  if([10,20,25,50,100,150,200,250,300,500,1000].includes(raw.count))
+    warnings.push(`Feed returns exactly ${raw.count} items, so it is probably capped by the host. Read the all-time column as “as far back as this feed goes”, not as the show's full history.`);
+  if(raw.seasons>1)
+    warnings.push(`${raw.seasons} seasons declared — off-season gaps are counted as breaks.`);
+  if(raw.bad)    warnings.push(`${raw.bad} item${raw.bad>1?"s":""} had an unreadable pubDate and ${raw.bad>1?"were":"was"} skipped.`);
+  if(raw.future) warnings.push(`${raw.future} item${raw.future>1?"s":""} dated in the future, excluded.`);
+  if(collapsed)  warnings.push(`${collapsed} episode${collapsed>1?"s":""} shared a release day with another and counted as one event.`);
+
+  const drift = (two.median && all.median) ? two.median/all.median : 1;
+  return {meta, thr, all, two, twoL, oneL, historyDays, ts, last, daysSince, status, warnings,
+          excludedTypes, drift, itemCount:raw.count};
+}
+
+/* ---------------- rendering ---------------- */
+const fmtD = (t)=> t==null ? "—" : new Date(t).toISOString().slice(0,10);
+const fmtN = (n)=> n==null ? "—" : (n>=100 ? Math.round(n) : n.toFixed(1));
+const fmtSpan = (d)=> d<60 ? `${Math.round(d)}d` : `${Math.round(d/30.44)} mo`;
+const hostOf = (u)=>{ try{ return new URL(u, location.href).hostname || u; }catch(e){ return u; } };
+const esc  = (s)=> String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function strip(r){
+  const W=340,H=46, pad=2, base=30;
+  const t0=r.ts[0], t1=Math.max(r.ts[r.ts.length-1], Date.now());
+  const span=Math.max(t1-t0,1);
+  const x=(t)=> pad + (t-t0)/span*(W-2*pad);
+  let s=`<svg class="strip" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Release timeline">`;
+  for(const b of r.all.breaks){
+    const x0=x(b.from), x1=x(b.to);
+    s+=`<rect class="void" x="${x0.toFixed(2)}" y="6" width="${Math.max(x1-x0,.6).toFixed(2)}" height="${base-6}"/>`;
+    if(x1-x0>26) s+=`<text class="voidlbl" x="${((x0+x1)/2).toFixed(1)}" y="20" text-anchor="middle">${Math.round(b.days)}d</text>`;
+  }
+  s+=`<line class="axis" x1="${pad}" y1="${base}" x2="${W-pad}" y2="${base}"/>`;
+  const cut=Date.now()-WINDOW_DAYS*DAY;
+  for(const t of r.ts){
+    const xx=x(t).toFixed(2);
+    s+=`<line class="tick${t>=cut?" tick-recent":""}" x1="${xx}" y1="8" x2="${xx}" y2="${base}"/>`;
+  }
+  if(t0<cut){
+    const bx=x(cut);
+    s+=`<line class="brk" x1="${bx.toFixed(2)}" y1="${base}" x2="${bx.toFixed(2)}" y2="${base+5}"/>`
+     + `<line class="brk" x1="${bx.toFixed(2)}" y1="${base+5}" x2="${W-pad}" y2="${base+5}"/>`
+     + `<line class="brk" x1="${W-pad}" y1="${base}" x2="${W-pad}" y2="${base+5}"/>`
+     + `<text class="brklbl" x="${(bx+3).toFixed(1)}" y="${base+13}">2 YEARS</text>`;
+  }
+  s+=`<text class="yr" x="${pad}" y="${base+13}">${new Date(t0).getUTCFullYear()}</text>`;
+  s+=`</svg>`;
+  return s;
+}
+
+function metric(title, w, thr, windowDays, historyDays){
+  // Only the last-episode windows pass windowDays; flag when the show is younger than the window.
+  const note = (windowDays && historyDays < windowDays)
+    ? `<div class="note">only ${fmtSpan(historyDays)} of history</div>` : "";
+  if(!w.median) return `<div class="metric"><span class="lbl">${title}</span>
+    <div class="dim">Not enough episodes<br>in this window</div>${note}</div>`;
+  return `<div class="metric">
+    <span class="lbl">${title}</span>
+    <div class="big">${fmtN(w.median)}<u>d</u></div>
+    <div class="cad">${labelCadence(w.median)}</div>
+    <div class="range"><b>${w.episodes}</b> episodes · <b>${w.gaps}</b> gaps<br>
+      ${fmtD(w.first)} → ${fmtD(w.last)}<br>
+      ${w.hiatusCount ? `<b>${w.hiatusCount}</b> break${w.hiatusCount>1?"s":""} · ${Math.round(w.hiatusDays)}d idle`
+                      : `no break over ${Math.round(thr)}d`}</div>
+    ${note}
+  </div>`;
+}
+
+function cardHTML(r, url){
+  if(r.error) return `<div class="head"><div class="art art-ph">!</div><div class="head-txt">
+      <h3 class="title">Could not read this feed</h3>
+      <p class="byline">${esc(url)}</p></div></div>
+    <div class="err">${esc(r.error)}<br><br>Most feeds block direct browser requests.
+      Check the proxy field, or try <code>https://corsproxy.io/?{url}</code>.</div>`;
+
+  const art = r.meta.image
+    ? `<img class="art" src="${esc(r.meta.image)}" alt="" loading="lazy"
+         onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'art art-ph',textContent:'♪'}))">`
+    : `<div class="art art-ph">♪</div>`;
+  const title = r.meta.link
+    ? `<a href="${esc(r.meta.link)}" target="_blank" rel="noopener">${esc(r.meta.title)}</a>`
+    : esc(r.meta.title);
+
+  if(r.thin) return `<div class="head">${art}<div class="head-txt">
+      <h3 class="title">${title}</h3><p class="byline">${esc(r.meta.author||url)}</p></div></div>
+    <div class="err">Only ${r.episodes} usable episode${r.episodes===1?"":"s"} — at least two are
+      needed to measure a gap.</div>`;
+
+  const driftNote = (r.drift>1.35||r.drift<0.74)
+    ? `<span class="mono" style="color:var(--ochre)">drift ${r.drift>1 ? "slower" : "faster"} ×${(r.drift>1?r.drift:1/r.drift).toFixed(2)}</span>`
+    : `<span class="mono">steady across both windows</span>`;
+
+  return `
+  <div class="head">${art}
+    <div class="head-txt">
+      <h3 class="title">${title}</h3>
+      <p class="byline">${esc(r.meta.author || hostOf(url))}</p>
+      <span class="badge s-${r.status.key}">${r.status.text}</span>
+    </div>
+  </div>
+  <div class="metrics">
+    ${metric("Last 2 years", r.two, r.thr)}
+    ${metric("All time in feed", r.all, r.thr)}
+    ${metric("2 yrs to last episode", r.twoL, r.thr, WINDOW_DAYS, r.historyDays)}
+    ${metric("1 yr to last episode", r.oneL, r.thr, WINDOW_1Y, r.historyDays)}
+  </div>
+  <div class="strip-wrap">${strip(r)}</div>
+  <div class="foot">
+    <span class="mono">Last episode ${fmtD(r.last)} · ${Math.round(r.daysSince)}d ago</span>
+    ${driftNote}
+  </div>
+  ${r.warnings.map(w=>`<div class="warn">${esc(w)}</div>`).join("")}`;
+}
+
+/* ---------------- app ---------------- */
+let results = [];
+const xmlCache = new Map();   // url -> raw XML, so option toggles never re-fetch
+
+function readOpts(){
+  return {fullOnly:$("optFull").checked, collapseDay:$("optDay").checked,
+          excludeHiatus:$("optExcl").checked};
+}
+function parseUrls(raw){
+  const seen=new Set();
+  return raw.split(/[\n,]+/).map(s=>s.trim()).filter(s=>{
+    if(!s || seen.has(s)) return false; seen.add(s); return true;
+  });
+}
+async function fetchFeed(url){
+  const tpl = $("proxy").value.trim();
+  const attempts = [url];
+  if(tpl) attempts.push(tpl.includes("{url}") ? tpl.replace("{url}", encodeURIComponent(url)) : tpl+encodeURIComponent(url));
+  let lastErr;
+  for(const a of attempts){
+    try{
+      const res = await fetch(a, {redirect:"follow"});
+      if(!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+      const body = await res.text();
+      if(!body.trim()) throw new Error("Empty response.");
+      return body;
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error("Request failed.");
+}
+
+async function pool(items, limit, worker){
+  let i = 0;
+  await Promise.all(Array.from({length:Math.min(limit,items.length)}, async ()=>{
+    while(i < items.length){ const k = i++; await worker(items[k], k); }
+  }));
+}
+
+function render(){
+  const grid = $("grid");
+  const f = $("filter").value, s = $("sort").value;
+  let list = results.filter(r=>r.data && !r.data.error && !r.data.thin);
+
+  if(f==="live")   list = list.filter(r=>["active","late"].includes(r.data.status.key));
+  if(f==="paused") list = list.filter(r=>["hiatus","dormant","ended"].includes(r.data.status.key));
+  if(f==="drift")  list = list.filter(r=>r.data.drift>1.35||r.data.drift<0.74);
+
+  const key = {
+    fast:  (r)=> r.data.two.median ?? r.data.all.median ?? 1e9,
+    slow:  (r)=>-(r.data.two.median ?? r.data.all.median ?? 0),
+    recent:(r)=>-r.data.last, stale:(r)=> r.data.last,
+    title: (r)=> r.data.meta.title.toLowerCase(),
+  }[s];
+  if(key) list.sort((a,b)=> key(a)>key(b) ? 1 : key(a)<key(b) ? -1 : 0);
+
+  const broken = results.filter(r=>r.data && (r.data.error||r.data.thin));
+  const shown = s==="added" && f==="all" ? results : [...list, ...(f==="all"?broken:[])];
+
+  grid.innerHTML = "";
+  for(const r of shown){
+    const el = document.createElement("article");
+    el.className = "card" + (r.data ? "" : " pending");
+    el.innerHTML = r.data ? cardHTML(r.data, r.url)
+      : `<div class="head"><div class="art art-ph">…</div><div class="head-txt">
+         <h3 class="title" style="font-size:14px">Loading</h3>
+         <p class="byline">${esc(r.url)}</p></div></div>`;
+    grid.appendChild(el);
+  }
+
+  const ok = results.filter(r=>r.data && !r.data.error && !r.data.thin);
+  const paused = ok.filter(r=>["hiatus","dormant","ended"].includes(r.data.status.key)).length;
+  const drifted = ok.filter(r=>r.data.drift>1.35||r.data.drift<0.74).length;
+  const errs = results.filter(r=>r.data&&r.data.error).length;
+  const meds = ok.map(r=>r.data.two.median).filter(Boolean);
+  $("tally").innerHTML =
+    `<b>${ok.length}</b> analyzed · <b>${paused}</b> paused or dormant · ` +
+    `<b>${drifted}</b> drifted` + (errs?` · <b>${errs}</b> failed`:"") +
+    (meds.length?` · median across shows <b>${fmtN(median(meds))}d</b>`:"");
+  $("bar").hidden = results.length===0;
+  $("empty").hidden = results.length>0;
+  $("csv").hidden = $("clear").hidden = ok.length===0;
+}
+
+async function run(urls, preloaded){
+  if(preloaded) for(const [u,x] of Object.entries(preloaded)) xmlCache.set(u,x);
+  results = urls.map(u=>({url:u, data:null}));
+  render();
+  const opts = readOpts();
+  await pool(results, 4, async (rec)=>{
+    try{
+      let xml = xmlCache.get(rec.url);
+      if(xml === undefined){ xml = await fetchFeed(rec.url); xmlCache.set(rec.url, xml); }
+      rec.data = analyze(parseFeed(xml), opts);
+    }catch(e){ rec.data = {error:e.message||String(e), meta:{}}; }
+    render();
+  });
+}
+
+// Re-score what is already loaded, without touching the network.
+function rescore(){
+  const opts = readOpts();
+  for(const rec of results){
+    const xml = xmlCache.get(rec.url);
+    if(xml === undefined) continue;
+    try{ rec.data = analyze(parseFeed(xml), opts); }
+    catch(e){ rec.data = {error:e.message||String(e), meta:{}}; }
+  }
+  render();
+}
+
+$("run").addEventListener("click", async ()=>{
+  const urls = parseUrls($("feeds").value);
+  if(!urls.length){ $("feeds").focus(); return; }
+  $("run").disabled = true; $("run").textContent = "Analyzing…";
+  await run(urls, null);
+  $("run").disabled = false; $("run").textContent = "Analyze feeds";
+});
+["sort","filter"].forEach(id=>$(id).addEventListener("change", render));
+["optFull","optDay","optExcl"].forEach(id=>$(id).addEventListener("change", ()=>{
+  if(results.length) rescore();
+}));
+$("clear").addEventListener("click", ()=>{
+  results=[]; xmlCache.clear(); $("feeds").value=""; render(); $("feeds").focus();
+});
+
+$("csv").addEventListener("click", ()=>{
+  const wHead = (p)=>[`${p}_median_days`,`${p}_cadence`,`${p}_episodes`,`${p}_first`,`${p}_last`,`${p}_breaks`,`${p}_idle_days`];
+  const wCols = (w)=>[fmtN(w.median), labelCadence(w.median), w.episodes, fmtD(w.first), fmtD(w.last), w.hiatusCount, Math.round(w.hiatusDays)];
+  const head = ["title","feed_url","status","last_episode","days_since",
+    ...wHead("2y"), ...wHead("all"), ...wHead("2y_to_last"), ...wHead("1y_to_last"),
+    "history_days","hiatus_threshold_days","drift_ratio"];
+  const rows = results.filter(r=>r.data&&!r.data.error&&!r.data.thin).map(r=>{
+    const d=r.data;
+    return [d.meta.title, r.url, d.status.text, fmtD(d.last), Math.round(d.daysSince),
+      ...wCols(d.two), ...wCols(d.all), ...wCols(d.twoL), ...wCols(d.oneL),
+      Math.round(d.historyDays), fmtN(d.thr), d.drift.toFixed(2)];
+  });
+  const csv = [head, ...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+  a.download = "cadence.csv"; a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* ---------------- demo data (no network) ---------------- */
+function demoFeeds(){
+  const now = Date.now(), rnd = (()=>{ let s=7; return ()=> (s=(s*16807)%2147483647)/2147483647; })();
+  const item = (t,d,type="full",season)=>
+    `<item><title>${t}</title><pubDate>${new Date(d).toUTCString()}</pubDate>`+
+    `<itunes:episodeType>${type}</itunes:episodeType>`+
+    (season?`<itunes:season>${season}</itunes:season>`:"")+`</item>`;
+  const wrap = (t,a,items)=>`<?xml version="1.0"?><rss version="2.0" `+
+    `xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"><channel><title>${t}</title>`+
+    `<itunes:author>${a}</itunes:author>${items.join("")}</channel></rss>`;
+  const j = (d)=> d + (rnd()-.5)*20*3600e3;
+  const F = {};
+
+  let it=[], n=0, d=now-1600*DAY;
+  while(d<now-1170*DAY){ it.push(item(`Episode ${++n}`, j(d))); d+=7*DAY; }
+  d+=420*DAY;
+  while(d<now-3*DAY){ it.push(item(`Episode ${++n}`, j(d))); d+=7*DAY; }
+  it.unshift(item("Trailer", now-1605*DAY, "trailer"));
+  F["demo://weekly-with-a-long-break"] = wrap("The Long Way Round","Marguerite Osei",it);
+
+  it=[]; n=0; d=now-1100*DAY;
+  for(const s of [1,2,3]){ for(let i=0;i<10;i++){ it.push(item(`S${s} · Episode ${++n}`, j(d), "full", s)); d+=7*DAY; } d+=150*DAY; }
+  F["demo://seasonal-series"] = wrap("Fault Lines","Public Record Audio",it);
+
+  it=[]; d=now-2000*DAY;
+  for(let i=0;i<30 && d<now-500*DAY;i++){ it.push(item(`Conversation ${i+1}`, d)); d+=(12+rnd()*58)*DAY; }
+  F["demo://quietly-stopped"] = wrap("Room Tone","Devika Raman",it);
+
+  it=[]; const dump = now-300*DAY;
+  for(let i=0;i<40;i++) it.push(item(`Archive ${i+1}`, dump));
+  d = dump+3*DAY; n=0;
+  while(d<now-2*DAY){ it.push(item(`Episode ${++n}`, j(d))); d+=3.5*DAY; }
+  F["demo://migrated-back-catalogue"] = wrap("Shortwave Daily","Halcyon Network",it);
+
+  return F;
+}
+$("demo").addEventListener("click", async ()=>{
+  const F = demoFeeds();
+  $("feeds").value = Object.keys(F).join("\n");
+  await run(Object.keys(F), F);
+});
+
+// When served by serve.py or Cloudflare Pages, use the site's own proxy instead of a public one.
+// Using a custom domain? Add it here, e.g. || location.hostname === "cadence.example.com"
+const OWN_PROXY = ["localhost","127.0.0.1","[::1]"].includes(location.hostname)
+               || location.hostname.endsWith(".pages.dev");
+if(OWN_PROXY){
+  $("proxy").value = "/proxy?url={url}";
+  $("proxyHint").textContent = "Using this site's built-in proxy.";
+}
+
+$("clock").textContent = new Date().toISOString().slice(0,10).replace(/-/g,".") +
+  " · median over " + WINDOW_DAYS + "d, full feed, and to last episode";
+render();
+</script>
+</body>
+</html>
